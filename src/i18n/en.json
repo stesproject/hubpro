@@ -1,0 +1,193 @@
+{
+  "app": {
+    "title": "HubPro",
+    "subtitle": "Personal Project Workspace & Command Center",
+    "storageBadge": "Synced locally",
+    "newProject": "New Project",
+    "searchPlaceholder": "Filter projects by name, tag, or path...",
+    "clearSearch": "Clear filter",
+    "allCategories": "All Projects",
+    "pinnedOnly": "Pinned",
+    "activeTodosFilter": "With Pending Tasks",
+    "theme": {
+      "system": "System Theme (Auto)",
+      "light": "Light Theme",
+      "dark": "Dark Theme"
+    },
+    "stats": {
+      "totalProjects": "{{count}} Projects",
+      "pendingTasks": "{{count}} Pending Tasks",
+      "completedTasks": "{{count}} Completed"
+    },
+    "emptyState": {
+      "noMatchTitle": "No projects match your filter",
+      "noMatchDescription": "Try searching for a different project name or reset your active filters.",
+      "resetFilters": "Reset Filters",
+      "noProjectsTitle": "Your Project Hub is empty",
+      "noProjectsDescription": "Create your first project to organize directories, shortcuts, commands, URLs, and tasks.",
+      "createFirst": "Create First Project"
+    }
+  },
+  "card": {
+    "clickHint": "Click card to trigger {{count}} configured action(s)",
+    "clickHintSingle": "Click card: {{label}}",
+    "openBoard": "Board & Overview",
+    "editProject": "Configure Project",
+    "pinProject": "Pin / Unpin project",
+    "tasksProgress": "{{completed}}/{{total}} tasks",
+    "noTasksYet": "No tasks yet",
+    "allTasksDone": "All {{total}} done!",
+    "primaryActionsBadge": "{{count}} click actions",
+    "primaryActionSingleBadge": "1 click action",
+    "quickActionsTitle": "Quick Actions",
+    "noButtonsConfigured": "No quick buttons configured",
+    "runPrimaryActions": "Run Primary Actions"
+  },
+  "actionTypes": {
+    "open_ide": "Open in IDE / App",
+    "open_folder": "Open Folder in Finder",
+    "open_app": "Launch Application (.app)",
+    "run_command": "Run Terminal Command",
+    "open_url": "Open External URL",
+    "open_board": "Open Project Board & Overview"
+  },
+  "actionDescriptions": {
+    "open_ide": "Opens a directory in Antigravity IDE, VS Code, Cursor, Zed, or any macOS app",
+    "open_folder": "Opens a folder or assets directory directly in macOS Finder",
+    "open_app": "Launches a native application from /Applications or custom path",
+    "run_command": "Executes a command (e.g. npm run dev) in Terminal.app or in background",
+    "open_url": "Opens a deployed domain, Cloudflare dashboard, or web resource in browser",
+    "open_board": "Opens the dedicated To-Do board, notes, and project overview inside HubPro"
+  },
+  "board": {
+    "backToHub": "Back to Hub",
+    "runCardClickActions": "Trigger Project Launch ({{count}})",
+    "configureProject": "Configure Project",
+    "tabs": {
+      "todos": "To-Do Cards",
+      "overview": "Overview, Notes & Resources"
+    },
+    "columns": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "done": "Completed"
+    },
+    "addCard": "Add Card",
+    "newCardTitlePlaceholder": "Card title (e.g. Implement auth flow)...",
+    "newCardDescPlaceholder": "Description, details, or checklist notes...",
+    "saveCard": "Add Card",
+    "cancel": "Cancel",
+    "editCardTitlePlaceholder": "Card title...",
+    "editCardDescPlaceholder": "Add a description...",
+    "markCompleted": "Mark as completed",
+    "markIncomplete": "Mark as incomplete",
+    "moveLeft": "Move to previous column",
+    "moveRight": "Move to next column",
+    "deleteCard": "Delete card",
+    "emptyColumn": "No cards in this stage",
+    "emptyColumnHint": "Click '+ Add Card' above to create a task card",
+    "progressSummary": "{{completed}} of {{total}} tasks completed ({{percent}}%)",
+    "filterCardsPlaceholder": "Filter cards by title or description...",
+    "showCompleted": "Show Completed",
+    "quickAddTitle": "Quick New Task Card",
+    "notesSection": {
+      "title": "Project Notes & Scratchpad",
+      "subtitle": "Jot down architecture notes, credentials hints, deployment steps, or ideas",
+      "placeholder": "Write anything pertinent to this project here... (saved automatically)",
+      "savedIndicator": "Auto-saved"
+    },
+    "resourcesSection": {
+      "title": "Project Directories, Links & Resources",
+      "subtitle": "Everything related to this project grouped in one place",
+      "rootDirLabel": "Root Directory",
+      "openInFinder": "Finder",
+      "openInAntigravity": "Antigravity",
+      "configuredButtons": "Configured Action Buttons",
+      "primaryClickSequence": "Primary Card Click Sequence"
+    }
+  },
+  "modal": {
+    "createTitle": "Create New Project",
+    "editTitle": "Configure Project — {{name}}",
+    "tabs": {
+      "general": "General & Preview",
+      "clickActions": "Card Click Actions",
+      "buttons": "Action Buttons",
+      "danger": "Manage"
+    },
+    "fields": {
+      "name": "Project Name",
+      "namePlaceholder": "e.g. RPG Weaver",
+      "tagline": "Short Subtitle / Status",
+      "taglinePlaceholder": "e.g. Next.js + Tailwind • Active Development",
+      "category": "Category / Tag",
+      "categoryPlaceholder": "e.g. Web, Game Dev, Tooling",
+      "rootDirectory": "Default Project Directory",
+      "rootDirectoryPlaceholder": "/Users/stef/Desktop/Dev/...",
+      "browseFolder": "Browse...",
+      "previewImage": "Preview Image (Optional)",
+      "previewImagePlaceholder": "Local file path or https:// image URL...",
+      "browseImage": "Choose Image...",
+      "clearImage": "Clear Image",
+      "accentGradient": "Card Cover Theme / Fallback Gradient",
+      "pinned": "Pin project to top of hub"
+    },
+    "clickActionsSection": {
+      "title": "When Clicking the Project Card",
+      "description": "Configure one or more actions that trigger together when you click the main body of the project card (for example: open project in Antigravity IDE + open assets directory + start local dev server).",
+      "addAction": "Add Click Action",
+      "noActions": "No primary click actions configured. Clicking the card will open the Project Board.",
+      "actionIndex": "Step #{{index}}"
+    },
+    "buttonsSection": {
+      "title": "Configurable Action Buttons",
+      "description": "These buttons appear directly underneath the project card for one-click execution of specific actions.",
+      "addButton": "Add Action Button",
+      "buttonLabel": "Button Text",
+      "buttonLabelPlaceholder": "e.g. Open in Antigravity, Start Dev, Cloudflare...",
+      "buttonIcon": "Icon",
+      "buttonColor": "Color Style",
+      "appearanceTitle": "Button Appearance",
+      "behaviorTitle": "Button Action & Target",
+      "expandAll": "Expand All",
+      "collapseAll": "Collapse All",
+      "addPresetAntigravity": "+ Antigravity IDE",
+      "addPresetFinder": "+ Open Directory",
+      "addPresetDevServer": "+ Start Dev Server",
+      "addPresetUrl": "+ External URL"
+    },
+    "actionEditor": {
+      "type": "Action Type",
+      "targetFolder": "Directory Path (leave blank to use Default Project Directory)",
+      "targetFolderPlaceholder": "Defaulting to project root directory",
+      "targetUrl": "External URL (Browser)",
+      "targetUrlPlaceholder": "https://dash.cloudflare.com or https://my-app.com",
+      "targetCommand": "Terminal Command",
+      "targetCommandPlaceholder": "e.g. npm run dev",
+      "workingDir": "Working Directory (leave blank for project root)",
+      "workingDirPlaceholder": "Defaulting to project root directory",
+      "ideApp": "Application / IDE Name",
+      "ideAppPlaceholder": "Antigravity, Visual Studio Code, Cursor, Zed, Godot...",
+      "executionMode": "Execution Mode",
+      "runInTerminalWindow": "Open in macOS Terminal.app window",
+      "runInBackground": "Run silently in background",
+      "boardInfo": "Opens this project's To-Do Cards Board & Notes Overview inside HubPro.",
+      "remove": "Remove"
+    },
+    "footer": {
+      "deleteProject": "Delete Project",
+      "confirmDelete": "Click again to confirm deletion",
+      "duplicateProject": "Duplicate",
+      "cancel": "Cancel",
+      "save": "Save Project",
+      "create": "Create Project"
+    }
+  },
+  "toast": {
+    "actionSuccess": "Executed: {{message}}",
+    "actionError": "Action failed: {{error}}",
+    "projectSaved": "Project \"{{name}}\" saved",
+    "projectDeleted": "Project deleted",
+    "dataExported": "Projects configuration copied to clipboard"
+  }
+}
