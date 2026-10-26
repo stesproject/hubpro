@@ -38,6 +38,16 @@ npm run tauri:dev
 npm run tauri:build
 ```
 
+## macOS Installation Note
+
+Because the app is not notarized with an Apple Developer certificate, macOS Gatekeeper might signal the application as unverified or "broken / damaged" when opened.
+
+To resolve this and allow the app to launch normally, run the following command in Terminal:
+```bash
+xattr -dr com.apple.quarantine /Applications/HubPro.app
+```
+*(If you run the app from another directory, replace `/Applications/HubPro.app` with the path to the app bundle).*
+
 ## Data Storage
 All your projects, custom buttons, click sequences, to-do cards, and notes are automatically saved in:
 ```text
