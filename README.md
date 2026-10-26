@@ -43,4 +43,20 @@ All your projects, custom buttons, click sequences, to-do cards, and notes are a
 ```text
 ~/.hubpro/projects.json
 ```
-# hubpro
+## Creating a New Release
+
+HubPro includes an automated GitHub Actions CI/CD workflow in [`.github/workflows/release.yml`](./.github/workflows/release.yml). When you push a version tag (e.g. `v1.0.0`), the workflow automatically:
+
+1. Compiles native desktop bundles concurrently across platforms:
+   - **macOS Apple Silicon**: `.dmg` (`aarch64`)
+   - **Windows**: `.exe` (NSIS installer) and `.msi`
+   - **Linux**: `.AppImage` and `.deb`
+2. Creates a published **GitHub Release** corresponding to the tag.
+3. Uploads all installer binaries directly to the release page in the repository.
+
+To release a new version:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
