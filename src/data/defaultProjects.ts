@@ -31,6 +31,21 @@ export const GRADIENT_PRESETS = [
     label: 'Graphite Obsidian',
     value: 'from-slate-700 via-zinc-800 to-neutral-900',
   },
+  {
+    id: 'rose-red',
+    label: 'Crimson Scarlet',
+    value: 'from-rose-600 via-red-600 to-orange-700',
+  },
+  {
+    id: 'lime-emerald',
+    label: 'Forest & Lime',
+    value: 'from-lime-500 via-green-600 to-emerald-800',
+  },
+  {
+    id: 'violet-midnight',
+    label: 'Midnight Nebula',
+    value: 'from-violet-700 via-indigo-800 to-slate-900',
+  },
 ];
 
 export const DEFAULT_PROJECTS: Project[] = [];

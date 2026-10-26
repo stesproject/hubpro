@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   Circle,
-  Kanban,
+  Play,
   Pin,
   Settings2,
   Zap,
@@ -137,26 +137,26 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
 
-  const clickTooltip =
+  const playTooltip =
     project.primaryClickActions.length === 1
       ? t('card.clickHintSingle', {
           label: formatActionSummary(project.primaryClickActions[0]),
         })
       : project.primaryClickActions.length > 1
         ? t('card.clickHint', { count: project.primaryClickActions.length })
-        : t('card.openBoard');
+        : t('card.runPrimaryActions');
 
   return (
     <div
-      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 ${
+      onClick={() => onOpenBoard(project)}
+      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 cursor-pointer ${
         isActionsOpen ? 'z-40' : 'hover:z-20'
       }`}
     >
       {/* Top Preview Cover + Clickable Main Trigger */}
       <div
-        onClick={() => onCardClick(project)}
-        title={clickTooltip}
-        className="relative h-36 w-full cursor-pointer overflow-hidden rounded-t-2xl select-none"
+        title={t('card.openBoard')}
+        className="relative h-36 w-full overflow-hidden rounded-t-2xl select-none"
       >
         {resolvedImg ? (
           <img
@@ -224,14 +224,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => onOpenBoard(project)}
-              title={t('card.openBoard')}
-              className="p-1.5 rounded-lg bg-black/40 text-white/85 hover:bg-indigo-600 hover:text-white backdrop-blur-md transition-colors"
-            >
-              <Kanban className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
               onClick={() => onEditProject(project)}
               title={t('card.editProject')}
               className="p-1.5 rounded-lg bg-black/40 text-white/85 hover:bg-black/70 hover:text-white backdrop-blur-md transition-colors"
@@ -260,17 +252,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <button
               type="button"
-              onClick={() => onOpenBoard(project)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCardClick(project);
+              }}
+              title={playTooltip}
+              aria-label={t('card.runPrimaryActions')}
+              className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-400 hover:text-white dark:hover:text-white transition-colors active:scale-95"
             >
-              <Kanban className="w-3.5 h-3.5 text-indigo-500" />
-              <span>{t('card.openBoard')}</span>
+              <Play className="w-3.5 h-3.5 fill-current" />
             </button>
 
-            <span
-              onClick={() => onOpenBoard(project)}
-              className="cursor-pointer text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-indigo-500"
-            >
+            <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-indigo-500">
               {totalTodos === 0
                 ? t('card.noTasksYet')
                 : completedTodos === totalTodos
@@ -283,10 +276,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div
-            onClick={() => onOpenBoard(project)}
-            className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden cursor-pointer mb-2.5"
-          >
+          <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden mb-2.5">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
                 progressPercent === 100
@@ -316,20 +306,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                   >
                     <Circle className="w-3.5 h-3.5" />
                   </button>
-                  <span
-                    onClick={() => onOpenBoard(project)}
-                    className="text-slate-600 dark:text-zinc-300 truncate cursor-pointer hover:text-slate-900 dark:hover:text-white"
-                  >
+                  <span className="text-slate-600 dark:text-zinc-300 truncate hover:text-slate-900 dark:hover:text-white">
                     {todo.title}
                   </span>
                 </div>
               ))}
             </div>
           ) : totalTodos > 0 ? (
-            <div
-              onClick={() => onOpenBoard(project)}
-              className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 py-1 cursor-pointer"
-            >
+            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 py-1">
               <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">
                 {t('card.allTasksDone', { total: totalTodos })}
@@ -341,7 +325,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 
       {/* Bottom Section: Dropdown for Action Buttons (Shown on Hover) */}
       <div
-        className="p-3 bg-slate-50/70 dark:bg-zinc-950/40 rounded-b-2xl relative"
+        onClick={(e) => e.stopPropagation()}
+        className="p-3 bg-slate-50/70 dark:bg-zinc-950/40 rounded-b-2xl relative cursor-default"
         onMouseEnter={handleActionsMouseEnter}
         onMouseLeave={handleActionsMouseLeave}
       >

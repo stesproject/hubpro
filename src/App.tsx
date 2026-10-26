@@ -4,10 +4,6 @@ import {
   Plus,
   Search,
   X,
-  Sun,
-  Moon,
-  Monitor,
-  Layers,
   CheckCircle2,
   ListTodo,
   Pin,
@@ -18,12 +14,10 @@ import {
   ConfiguredAction,
   Project,
   ProjectActionButton,
-  ThemeMode,
 } from './types/project';
 import {
   executeActionSequence,
   executeSingleAction,
-  getStorageFilePath,
   loadProjects,
   saveProjects,
 } from './services/bridge';
@@ -42,7 +36,6 @@ export const App: React.FC = () => {
   const { t } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [storagePath, setStoragePath] = useState('~/.hubpro/projects.json');
 
   // Filtering & Navigation State
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,12 +58,6 @@ export const App: React.FC = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
-  // Theme State (defaults to 'system' to sync automatically with macOS)
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('prohub_theme_mode') as ThemeMode | null;
-    return saved || 'system';
-  });
-
   // Toast feedback
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
@@ -82,34 +69,28 @@ export const App: React.FC = () => {
     }, 3400);
   };
 
-  // Sync theme with macOS prefers-color-scheme
+  // Sync theme automatically with macOS prefers-color-scheme
   useEffect(() => {
-    localStorage.setItem('prohub_theme_mode', themeMode);
+    localStorage.removeItem('prohub_theme_mode');
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = () => {
-      const isDark =
-        themeMode === 'dark' ||
-        (themeMode === 'system' && mediaQuery.matches);
-      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.classList.toggle('dark', mediaQuery.matches);
     };
 
     applyTheme();
     mediaQuery.addEventListener('change', applyTheme);
     return () => mediaQuery.removeEventListener('change', applyTheme);
-  }, [themeMode]);
+  }, []);
 
   // Initial Load of Projects
   useEffect(() => {
     let mounted = true;
-    Promise.all([loadProjects(), getStorageFilePath()]).then(
-      ([initialProjects, filePath]) => {
-        if (!mounted) return;
-        setProjects(initialProjects);
-        setStoragePath(filePath);
-        setLoaded(true);
-      }
-    );
+    loadProjects().then((initialProjects) => {
+      if (!mounted) return;
+      setProjects(initialProjects);
+      setLoaded(true);
+    });
     return () => {
       mounted = false;
     };
@@ -120,30 +101,36 @@ export const App: React.FC = () => {
     saveProjects(nextProjects);
   };
 
-  // Global stats across all projects
-  const globalStats = useMemo(() => {
-    let pending = 0;
-    let completed = 0;
-    for (const p of projects) {
-      for (const td of p.todos) {
-        if (td.completed) completed++;
-        else pending++;
-      }
-    }
-    return {
-      totalProjects: projects.length,
-      pending,
-      completed,
-    };
-  }, [projects]);
-
-  // Distinct categories for filter pills
+  // Distinct categories and counts for filter pills
   const categories = useMemo(() => {
     const set = new Set<string>();
     projects.forEach((p) => {
       if (p.category?.trim()) set.add(p.category.trim());
     });
     return Array.from(set);
+  }, [projects]);
+
+  const filterCounts = useMemo(() => {
+    const byCategory: Record<string, number> = {};
+    let pinned = 0;
+    let withPendingTodos = 0;
+
+    for (const p of projects) {
+      const cat = p.category?.trim();
+      if (cat) {
+        const key = cat.toLowerCase();
+        byCategory[key] = (byCategory[key] || 0) + 1;
+      }
+      if (p.pinned) pinned++;
+      if (p.todos.some((td) => !td.completed)) withPendingTodos++;
+    }
+
+    return {
+      all: projects.length,
+      byCategory,
+      pinned,
+      withPendingTodos,
+    };
   }, [projects]);
 
   // Filtered & sorted projects (pinned first)
@@ -340,112 +327,12 @@ export const App: React.FC = () => {
     persistAndSetProjects(next);
   };
 
-  const cycleTheme = () => {
-    setThemeMode((prev) =>
-      prev === 'system' ? 'light' : prev === 'light' ? 'dark' : 'system'
-    );
-  };
-
   if (!loaded) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col">
-      {/* Sticky Top Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border-b border-slate-200/80 dark:border-zinc-800/80">
-        <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between gap-4 flex-wrap">
-          {/* Brand Logo & Overview Counters */}
-          <div className="flex items-center gap-6">
-            <div
-              onClick={() => setActiveBoardProjectId(null)}
-              className="flex items-center gap-3 cursor-pointer group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                <Layers className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
-                    {t('app.title')}
-                  </span>
-                  <span
-                    title={storagePath}
-                    className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400"
-                  >
-                    {t('app.storageBadge')}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 hidden sm:block">
-                  {t('app.subtitle')}
-                </p>
-              </div>
-            </div>
-
-            {/* Global At-a-glance Pills */}
-            <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-slate-200 dark:border-zinc-800">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100/80 dark:bg-zinc-800/70 text-xs font-medium text-slate-700 dark:text-zinc-300">
-                <Layers className="w-3.5 h-3.5 text-indigo-500" />
-                <span>
-                  {t('app.stats.totalProjects', {
-                    count: globalStats.totalProjects,
-                  })}
-                </span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-xs font-medium text-amber-700 dark:text-amber-300">
-                <ListTodo className="w-3.5 h-3.5 text-amber-500" />
-                <span>
-                  {t('app.stats.pendingTasks', {
-                    count: globalStats.pending,
-                  })}
-                </span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                <span>
-                  {t('app.stats.completedTasks', {
-                    count: globalStats.completed,
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Actions: Theme Switcher & New Project Button */}
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={cycleTheme}
-              title={t(`app.theme.${themeMode}`)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-medium text-slate-700 dark:text-zinc-200 transition-colors"
-            >
-              {themeMode === 'system' ? (
-                <Monitor className="w-3.5 h-3.5 text-indigo-500" />
-              ) : themeMode === 'light' ? (
-                <Sun className="w-3.5 h-3.5 text-amber-500" />
-              ) : (
-                <Moon className="w-3.5 h-3.5 text-sky-400" />
-              )}
-              <span className="hidden md:inline">
-                {t(`app.theme.${themeMode}`)}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEditingProject(null);
-                setIsCreatingNew(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-500/20 transition-all active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{t('app.newProject')}</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-6">
         {activeBoardProject ? (
@@ -498,7 +385,7 @@ export const App: React.FC = () => {
                       : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800'
                   }`}
                 >
-                  {t('app.allCategories')}
+                  {t('app.allCategories')} ({filterCounts.all})
                 </button>
 
                 {categories.map((cat) => (
@@ -516,7 +403,7 @@ export const App: React.FC = () => {
                         : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border border-slate-200/80 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800'
                     }`}
                   >
-                    {cat}
+                    {cat} ({filterCounts.byCategory[cat.toLowerCase()] || 0})
                   </button>
                 ))}
 
@@ -532,7 +419,9 @@ export const App: React.FC = () => {
                   }`}
                 >
                   <Pin className="w-3 h-3" />
-                  <span>{t('app.pinnedOnly')}</span>
+                  <span>
+                    {t('app.pinnedOnly')} ({filterCounts.pinned})
+                  </span>
                 </button>
 
                 <button
@@ -545,7 +434,9 @@ export const App: React.FC = () => {
                   }`}
                 >
                   <ListTodo className="w-3.5 h-3.5" />
-                  <span>{t('app.activeTodosFilter')}</span>
+                  <span>
+                    {t('app.activeTodosFilter')} ({filterCounts.withPendingTodos})
+                  </span>
                 </button>
               </div>
             </div>
@@ -616,6 +507,20 @@ export const App: React.FC = () => {
         )}
       </main>
 
+      {/* Floating + New Project Button */}
+      <button
+        type="button"
+        onClick={() => {
+          setEditingProject(null);
+          setIsCreatingNew(true);
+        }}
+        title={t('app.newProject')}
+        aria-label={t('app.newProject')}
+        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all active:scale-95"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
       {/* Create / Edit Project Modal */}
       {(isCreatingNew || editingProject) && (
         <ProjectConfigModal
@@ -642,7 +547,7 @@ export const App: React.FC = () => {
 
       {/* Floating Toast Notifications */}
       {toasts.length > 0 && (
-        <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm">
+        <div className="fixed bottom-20 right-6 z-50 flex flex-col gap-2 max-w-sm">
           {toasts.map((toast) => (
             <div
               key={toast.id}
