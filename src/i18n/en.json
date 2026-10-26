@@ -40,9 +40,10 @@
     "primaryActionsBadge": "{{count}} click actions",
     "primaryActionSingleBadge": "1 click action",
     "quickActionsTitle": "Quick Actions",
-    "actionsDropdownTitle": "Actions",
-    "actionsDropdownCount": "{{count}} Actions",
-    "actionsDropdownHint": "Hover to view {{count}} actions",
+    "viewActionsPopup": "Actions ({{count}})",
+    "actionsPopupTitle": "Actions & Shortcuts",
+    "actionsPopupHint": "Hover to view all actions",
+    "quickLaunch": "Launch",
     "noButtonsConfigured": "No quick buttons configured",
     "runPrimaryActions": "Run Primary Actions"
   },

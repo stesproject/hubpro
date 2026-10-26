@@ -3,13 +3,15 @@ import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   Circle,
-  Play,
+  Kanban,
   Pin,
   Settings2,
   Zap,
   FolderGit2,
-  ChevronDown,
   Sparkles,
+  ChevronUp,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import {
   ButtonVariant,
@@ -30,17 +32,43 @@ interface ProjectCardProps {
   onQuickToggleTodo: (projectId: string, todoId: string) => void;
 }
 
-const BUTTON_VARIANT_BADGES: Record<ButtonVariant, string> = {
-  primary:
-    'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 group-hover/item:bg-indigo-600 group-hover/item:text-white',
-  emerald:
-    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 group-hover/item:bg-emerald-600 group-hover/item:text-white',
-  amber:
-    'bg-amber-500/15 text-amber-600 dark:text-amber-400 group-hover/item:bg-amber-500 group-hover/item:text-white',
-  violet:
-    'bg-violet-500/15 text-violet-600 dark:text-violet-400 group-hover/item:bg-violet-600 group-hover/item:text-white',
-  secondary:
-    'bg-slate-500/15 text-slate-600 dark:text-zinc-400 group-hover/item:bg-slate-700 group-hover/item:text-white dark:group-hover/item:bg-zinc-600',
+const BUTTON_VARIANT_POPOVER: Record<
+  ButtonVariant,
+  {
+    container: string;
+    iconBox: string;
+  }
+> = {
+  primary: {
+    container:
+      'bg-indigo-50/80 hover:bg-indigo-600 text-indigo-900 hover:text-white dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-600 dark:hover:text-white border-indigo-200/70 dark:border-indigo-800/60 hover:border-indigo-600',
+    iconBox:
+      'bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 group-hover/btn:bg-white/20 group-hover/btn:text-white',
+  },
+  emerald: {
+    container:
+      'bg-emerald-50/80 hover:bg-emerald-600 text-emerald-900 hover:text-white dark:bg-emerald-950/40 dark:text-emerald-200 dark:hover:bg-emerald-600 dark:hover:text-white border-emerald-200/70 dark:border-emerald-800/60 hover:border-emerald-600',
+    iconBox:
+      'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 group-hover/btn:bg-white/20 group-hover/btn:text-white',
+  },
+  amber: {
+    container:
+      'bg-amber-50/80 hover:bg-amber-500 text-amber-900 hover:text-white dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-500 dark:hover:text-white border-amber-200/70 dark:border-amber-800/60 hover:border-amber-500',
+    iconBox:
+      'bg-amber-600/10 text-amber-600 dark:text-amber-400 group-hover/btn:bg-white/20 group-hover/btn:text-white',
+  },
+  violet: {
+    container:
+      'bg-violet-50/80 hover:bg-violet-600 text-violet-900 hover:text-white dark:bg-violet-950/40 dark:text-violet-200 dark:hover:bg-violet-600 dark:hover:text-white border-violet-200/70 dark:border-violet-800/60 hover:border-violet-600',
+    iconBox:
+      'bg-violet-600/10 text-violet-600 dark:text-violet-400 group-hover/btn:bg-white/20 group-hover/btn:text-white',
+  },
+  secondary: {
+    container:
+      'bg-slate-100/90 hover:bg-slate-800 text-slate-800 hover:text-white dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-white border-slate-200/80 dark:border-zinc-700 hover:border-slate-800',
+    iconBox:
+      'bg-slate-200/70 text-slate-600 dark:bg-zinc-700 dark:text-zinc-300 group-hover/btn:bg-white/20 group-hover/btn:text-white',
+  },
 };
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -54,8 +82,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const [resolvedImg, setResolvedImg] = useState<string | null>(null);
-  const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const leaveTimeoutRef = useRef<number | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const hoverTimerRef = useRef<number | null>(null);
+  const leaveTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -67,18 +97,41 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     };
   }, [project.previewImage]);
 
-  const handleActionsMouseEnter = () => {
-    if (leaveTimeoutRef.current !== null) {
-      window.clearTimeout(leaveTimeoutRef.current);
-      leaveTimeoutRef.current = null;
+  // Clean, non-intrusive hover triggers
+  const handleTriggerMouseEnter = () => {
+    if (leaveTimerRef.current !== null) {
+      window.clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
     }
-    setIsActionsOpen(true);
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current);
+    }
+    hoverTimerRef.current = window.setTimeout(() => {
+      setIsPopupOpen(true);
+    }, 100);
   };
 
-  const handleActionsMouseLeave = () => {
-    leaveTimeoutRef.current = window.setTimeout(() => {
-      setIsActionsOpen(false);
-    }, 150);
+  const handleTriggerMouseLeave = () => {
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    leaveTimerRef.current = window.setTimeout(() => {
+      setIsPopupOpen(false);
+    }, 220);
+  };
+
+  const handlePopupMouseEnter = () => {
+    if (leaveTimerRef.current !== null) {
+      window.clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+  };
+
+  const handlePopupMouseLeave = () => {
+    leaveTimerRef.current = window.setTimeout(() => {
+      setIsPopupOpen(false);
+    }, 200);
   };
 
   const totalTodos = project.todos.length;
@@ -94,8 +147,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         return `${act.appName || 'Antigravity'}`;
       case 'open_folder':
         return t('actionTypes.open_folder');
-      case 'open_document':
-        return t('actionTypes.open_document', { defaultValue: 'Open Document' });
       case 'open_app':
         return t('actionTypes.open_app');
       case 'run_command':
@@ -113,10 +164,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         return act.appName || 'Antigravity';
       case 'open_folder':
         return 'Finder';
-      case 'open_document': {
-        const parts = act.target.split('/');
-        return parts[parts.length - 1] || 'Document';
-      }
       case 'open_app':
         return 'App';
       case 'run_command':
@@ -137,26 +184,26 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
 
-  const playTooltip =
+  const clickTooltip =
     project.primaryClickActions.length === 1
       ? t('card.clickHintSingle', {
           label: formatActionSummary(project.primaryClickActions[0]),
         })
       : project.primaryClickActions.length > 1
         ? t('card.clickHint', { count: project.primaryClickActions.length })
-        : t('card.runPrimaryActions');
+        : t('card.openBoard');
 
   return (
     <div
-      onClick={() => onOpenBoard(project)}
-      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 cursor-pointer ${
-        isActionsOpen ? 'z-40' : 'hover:z-20'
+      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 ${
+        isPopupOpen ? 'z-30' : 'hover:z-10'
       }`}
     >
       {/* Top Preview Cover + Clickable Main Trigger */}
       <div
-        title={t('card.openBoard')}
-        className="relative h-36 w-full overflow-hidden rounded-t-2xl select-none"
+        onClick={() => onCardClick(project)}
+        title={clickTooltip}
+        className="relative h-36 w-full cursor-pointer overflow-hidden rounded-t-2xl select-none"
       >
         {resolvedImg ? (
           <img
@@ -171,7 +218,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               'from-indigo-600 via-violet-600 to-purple-700'
             } flex items-center justify-center relative`}
           >
-            {/* Subtle decorative mesh */}
             <div
               className="absolute inset-0 opacity-20"
               style={{
@@ -224,6 +270,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </button>
             <button
               type="button"
+              onClick={() => onOpenBoard(project)}
+              title={t('card.openBoard')}
+              className="p-1.5 rounded-lg bg-black/40 text-white/85 hover:bg-indigo-600 hover:text-white backdrop-blur-md transition-colors"
+            >
+              <Kanban className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
               onClick={() => onEditProject(project)}
               title={t('card.editProject')}
               className="p-1.5 rounded-lg bg-black/40 text-white/85 hover:bg-black/70 hover:text-white backdrop-blur-md transition-colors"
@@ -252,18 +306,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCardClick(project);
-              }}
-              title={playTooltip}
-              aria-label={t('card.runPrimaryActions')}
-              className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-400 hover:text-white dark:hover:text-white transition-colors active:scale-95"
+              onClick={() => onOpenBoard(project)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
+              <Kanban className="w-3.5 h-3.5 text-indigo-500" />
+              <span>{t('card.openBoard')}</span>
             </button>
 
-            <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-indigo-500">
+            <span
+              onClick={() => onOpenBoard(project)}
+              className="cursor-pointer text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-indigo-500"
+            >
               {totalTodos === 0
                 ? t('card.noTasksYet')
                 : completedTodos === totalTodos
@@ -323,12 +376,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </div>
       </div>
 
-      {/* Bottom Section: Dropdown for Action Buttons (Shown on Hover) */}
+      {/* Bottom Section: Actions Button + Floating Non-Intrusive Popover */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="p-3 bg-slate-50/70 dark:bg-zinc-950/40 rounded-b-2xl relative cursor-default"
-        onMouseEnter={handleActionsMouseEnter}
-        onMouseLeave={handleActionsMouseLeave}
+        onMouseEnter={handleTriggerMouseEnter}
+        onMouseLeave={handleTriggerMouseLeave}
       >
         {project.buttons.length > 0 ? (
           <div className="relative">
@@ -337,87 +390,132 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsActionsOpen((prev) => !prev);
+                setIsPopupOpen((prev) => !prev);
               }}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white dark:bg-zinc-800/90 hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200/80 dark:border-zinc-700/80 hover:border-indigo-500/40 text-xs font-semibold text-slate-700 dark:text-zinc-200 shadow-sm transition-all select-none"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-800/90 hover:bg-indigo-50/80 dark:hover:bg-zinc-800 border border-slate-200/80 dark:border-zinc-700/80 hover:border-indigo-500/50 text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 shadow-sm transition-all select-none group/trigger"
             >
               <div className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                <span>{t('card.actionsDropdownTitle')}</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
-                  {project.buttons.length}
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0 group-hover/trigger:scale-110 transition-transform" />
+                <span>
+                  {t('card.viewActionsPopup', { count: project.buttons.length })}
                 </span>
               </div>
-              <ChevronDown
+              <ChevronUp
                 className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                  isActionsOpen ? 'rotate-180 text-indigo-500' : ''
+                  isPopupOpen ? 'rotate-180 text-indigo-500' : ''
                 }`}
               />
             </button>
 
-            {/* Dropdown Menu List (Revealed on Hover) */}
-            {isActionsOpen && (
+            {/* Non-Intrusive Floating Popup (Popping up directly above the trigger) */}
+            {isPopupOpen && (
               <div
-                onClick={(e) => e.stopPropagation()}
-                className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700/80 shadow-2xl overflow-hidden animate-fadeIn"
+                onMouseEnter={handlePopupMouseEnter}
+                onMouseLeave={handlePopupMouseLeave}
+                className="absolute bottom-[calc(100%+8px)] left-[-4px] right-[-4px] z-50 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-zinc-700/90 shadow-2xl shadow-indigo-500/10 dark:shadow-black/50 overflow-hidden animate-fadeIn"
               >
-                {/* Dropdown Header */}
-                <div className="px-3.5 py-2 bg-slate-50/80 dark:bg-zinc-950/60 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-zinc-400">
-                  <span>
-                    {t('card.actionsDropdownCount', {
-                      count: project.buttons.length,
-                    })}
-                  </span>
+                {/* Popup Header */}
+                <div className="px-3.5 py-2 bg-slate-50/90 dark:bg-zinc-950/70 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                    <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                      {t('card.actionsPopupTitle')}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
+                      {project.buttons.length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {project.primaryClickActions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsPopupOpen(false);
+                          onCardClick(project);
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold shadow-sm transition-colors"
+                      >
+                        <Zap className="w-2.5 h-2.5" />
+                        <span>{t('card.quickLaunch')}</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setIsPopupOpen(false)}
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Actions Grid (2-column layout for projects with > 4 actions) */}
+                <div
+                  className={`p-2 max-h-72 overflow-y-auto ${
+                    project.buttons.length > 4
+                      ? 'grid grid-cols-2 gap-1.5'
+                      : 'grid grid-cols-1 gap-1.5'
+                  }`}
+                >
+                  {project.buttons.map((btn) => {
+                    const styleMeta =
+                      BUTTON_VARIANT_POPOVER[btn.variant || 'secondary'];
+
+                    return (
+                      <button
+                        key={btn.id}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsPopupOpen(false);
+                          onButtonClick(btn, project);
+                        }}
+                        className={`group/btn flex items-center justify-between p-2 rounded-xl text-left border transition-all active:scale-[0.98] ${styleMeta.container}`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            className={`p-1.5 rounded-lg shrink-0 transition-all ${styleMeta.iconBox}`}
+                          >
+                            <ActionIcon
+                              name={btn.icon}
+                              fallbackType={btn.action.type}
+                              className="w-3.5 h-3.5"
+                            />
+                          </span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold truncate leading-tight">
+                              {btn.label}
+                            </div>
+                            <div className="text-[10px] font-mono opacity-60 truncate mt-0.5">
+                              {formatTargetHint(btn.action)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <ExternalLink className="w-3 h-3 opacity-30 group-hover/btn:opacity-100 shrink-0 ml-1.5 transition-opacity" />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Popup Footer */}
+                <div className="px-3 py-1.5 bg-slate-50/70 dark:bg-zinc-950/50 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-[11px] text-slate-400 dark:text-zinc-500">
                   <button
                     type="button"
                     onClick={() => {
-                      setIsActionsOpen(false);
+                      setIsPopupOpen(false);
                       onEditProject(project);
                     }}
-                    className="text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="hover:text-indigo-500 transition-colors"
                   >
-                    {t('card.editProject')}
+                    + {t('card.editProject')}
                   </button>
-                </div>
-
-                {/* Scrollable Actions List */}
-                <div className="p-1.5 max-h-64 sm:max-h-72 overflow-y-auto space-y-0.5">
-                  {project.buttons.map((btn) => (
-                    <button
-                      key={btn.id}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsActionsOpen(false);
-                        onButtonClick(btn, project);
-                      }}
-                      title={`${btn.label} → ${
-                        btn.action.target || project.rootDirectory
-                      }`}
-                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/90 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors group/item text-left"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span
-                          className={`p-1.5 rounded-lg shrink-0 transition-colors ${
-                            BUTTON_VARIANT_BADGES[btn.variant || 'secondary']
-                          }`}
-                        >
-                          <ActionIcon
-                            name={btn.icon}
-                            fallbackType={btn.action.type}
-                            className="w-3.5 h-3.5"
-                          />
-                        </span>
-                        <span className="font-semibold truncate">
-                          {btn.label}
-                        </span>
-                      </div>
-
-                      <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 truncate max-w-[130px] ml-2 shrink-0 opacity-75 group-hover/item:opacity-100 group-hover/item:text-indigo-500">
-                        {formatTargetHint(btn.action)}
-                      </span>
-                    </button>
-                  ))}
+                  <span className="text-[10px]">
+                    {project.buttons.length} actions ready
+                  </span>
                 </div>
               </div>
             )}
