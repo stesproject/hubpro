@@ -445,7 +445,7 @@ export const ProjectBoardView: React.FC<ProjectBoardViewProps> = ({
                         setDraggedCardId(null);
                         setDragOverColumn(null);
                       }}
-                      className={`group rounded-xl bg-white dark:bg-zinc-900 border p-3.5 shadow-sm hover:shadow-md transition-all ${
+                      className={`group rounded-xl bg-white dark:bg-zinc-900 border p-3.5 shadow-sm hover:shadow-md transition-[border-color,box-shadow,background-color] duration-150 ${
                         card.completed
                           ? 'border-emerald-500/30 dark:border-emerald-500/25 bg-emerald-50/20 dark:bg-emerald-950/10'
                           : 'border-slate-200/90 dark:border-zinc-800 hover:border-indigo-500/40'

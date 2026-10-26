@@ -202,7 +202,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   return (
     <div
       onClick={() => onOpenBoard(project)}
-      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 cursor-pointer ${
+      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-[border-color,box-shadow,background-color] duration-200 cursor-pointer ${
         isPopupOpen ? 'z-30' : 'hover:z-10'
       }`}
     >

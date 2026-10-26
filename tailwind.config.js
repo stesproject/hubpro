@@ -9,19 +9,22 @@ export default {
     extend: {
       fontFamily: {
         sans: [
+          'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
-          '"SF Pro Display"',
-          '"SF Pro Text"',
-          '"Inter"',
-          'system-ui',
+          '"Segoe UI"',
+          'Roboto',
+          'Helvetica',
+          'Arial',
           'sans-serif',
         ],
         mono: [
+          'ui-monospace',
           '"SF Mono"',
           '"JetBrains Mono"',
           'Menlo',
           'Monaco',
+          'Consolas',
           'monospace',
         ],
       },
