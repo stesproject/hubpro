@@ -1,4 +1,4 @@
-# HubPro — Personal Project Workspace & Command Center
+# HubPro - Personal Project Workspace & Command Center
 
 HubPro is a lightweight, native macOS & cross-platform desktop application built with **Tauri v2**, **React**, **TypeScript**, and **Tailwind CSS** to organize all your active development projects in one clean, modern hub.
 

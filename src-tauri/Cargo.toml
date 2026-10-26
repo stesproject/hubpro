@@ -1,7 +1,7 @@
 [package]
 name = "hubpro"
 version = "1.0.0"
-description = "HubPro — Modern Project Workspace & To-Do Hub"
+description = "HubPro - Modern Project Workspace & To-Do Hub"
 authors = ["Stef"]
 edition = "2021"
 

@@ -111,7 +111,7 @@
   },
   "modal": {
     "createTitle": "Create New Project",
-    "editTitle": "Configure Project — {{name}}",
+    "editTitle": "Configure Project - {{name}}",
     "tabs": {
       "general": "General & Preview",
       "clickActions": "Card Click Actions",
