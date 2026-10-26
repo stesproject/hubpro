@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   Circle,
-  Kanban,
+  Play,
   Pin,
   Settings2,
   Zap,
@@ -147,6 +147,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         return `${act.appName || 'Antigravity'}`;
       case 'open_folder':
         return t('actionTypes.open_folder');
+      case 'open_document':
+        return t('actionTypes.open_document', { defaultValue: 'Open Document' });
       case 'open_app':
         return t('actionTypes.open_app');
       case 'run_command':
@@ -164,6 +166,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         return act.appName || 'Antigravity';
       case 'open_folder':
         return 'Finder';
+      case 'open_document': {
+        const parts = act.target.split('/');
+        return parts[parts.length - 1] || 'Document';
+      }
       case 'open_app':
         return 'App';
       case 'run_command':
@@ -184,26 +190,26 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
 
-  const clickTooltip =
+  const playTooltip =
     project.primaryClickActions.length === 1
       ? t('card.clickHintSingle', {
           label: formatActionSummary(project.primaryClickActions[0]),
         })
       : project.primaryClickActions.length > 1
         ? t('card.clickHint', { count: project.primaryClickActions.length })
-        : t('card.openBoard');
+        : t('card.runPrimaryActions');
 
   return (
     <div
-      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 ${
+      onClick={() => onOpenBoard(project)}
+      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/90 shadow-sm hover:shadow-xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 cursor-pointer ${
         isPopupOpen ? 'z-30' : 'hover:z-10'
       }`}
     >
       {/* Top Preview Cover + Clickable Main Trigger */}
       <div
-        onClick={() => onCardClick(project)}
-        title={clickTooltip}
-        className="relative h-36 w-full cursor-pointer overflow-hidden rounded-t-2xl select-none"
+        title={t('card.openBoard')}
+        className="relative h-36 w-full overflow-hidden rounded-t-2xl select-none"
       >
         {resolvedImg ? (
           <img
@@ -270,14 +276,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => onOpenBoard(project)}
-              title={t('card.openBoard')}
-              className="p-1.5 rounded-lg bg-black/40 text-white/85 hover:bg-indigo-600 hover:text-white backdrop-blur-md transition-colors"
-            >
-              <Kanban className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
               onClick={() => onEditProject(project)}
               title={t('card.editProject')}
               className="p-1.5 rounded-lg bg-black/40 text-white/85 hover:bg-black/70 hover:text-white backdrop-blur-md transition-colors"
@@ -306,17 +304,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <button
               type="button"
-              onClick={() => onOpenBoard(project)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCardClick(project);
+              }}
+              title={playTooltip}
+              aria-label={t('card.runPrimaryActions')}
+              className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-400 hover:text-white dark:hover:text-white transition-colors active:scale-95"
             >
-              <Kanban className="w-3.5 h-3.5 text-indigo-500" />
-              <span>{t('card.openBoard')}</span>
+              <Play className="w-3.5 h-3.5 fill-current" />
             </button>
 
-            <span
-              onClick={() => onOpenBoard(project)}
-              className="cursor-pointer text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-indigo-500"
-            >
+            <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-indigo-500">
               {totalTodos === 0
                 ? t('card.noTasksYet')
                 : completedTodos === totalTodos
