@@ -113,6 +113,41 @@ fn execute_action(
             Ok(format!("Opened folder: {}", expanded_target))
         }
 
+        "open_document" | "open_file" => {
+            if expanded_target.is_empty() {
+                return Err("Document path is empty.".to_string());
+            }
+            let path = Path::new(&expanded_target);
+            if !path.exists() {
+                return Err(format!("Document does not exist: {}", expanded_target));
+            }
+            #[cfg(target_os = "macos")]
+            {
+                let mut cmd = Command::new("open");
+                if let Some(ref app) = app_name.filter(|s| !s.trim().is_empty()) {
+                    cmd.arg("-a").arg(app);
+                }
+                cmd.arg(&expanded_target)
+                    .spawn()
+                    .map_err(|e| format!("Failed to open document: {}", e))?;
+            }
+            #[cfg(target_os = "windows")]
+            {
+                Command::new("cmd")
+                    .args(["/C", "start", "", &expanded_target])
+                    .spawn()
+                    .map_err(|e| format!("Failed to open document: {}", e))?;
+            }
+            #[cfg(target_os = "linux")]
+            {
+                Command::new("xdg-open")
+                    .arg(&expanded_target)
+                    .spawn()
+                    .map_err(|e| format!("Failed to open document: {}", e))?;
+            }
+            Ok(format!("Opened document: {}", expanded_target))
+        }
+
         "open_ide" => {
             let folder_to_open = if !expanded_target.is_empty() {
                 expanded_target
@@ -329,6 +364,42 @@ fn pick_image_dialog() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
+fn pick_document_dialog() -> Result<Option<String>, String> {
+    #[cfg(target_os = "macos")]
+    {
+        let output = Command::new("osascript")
+            .arg("-e")
+            .arg("POSIX path of (choose file with prompt \"Select Document / File\")")
+            .output()
+            .map_err(|e| format!("Failed to open file picker: {}", e))?;
+
+        if !output.status.success() {
+            return Ok(None);
+        }
+        let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if path.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(path))
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok(None)
+    }
+}
+
+#[tauri::command]
+fn read_document_file(path: String) -> Result<String, String> {
+    let expanded = expand_tilde(&path);
+    let file_path = Path::new(&expanded);
+    if !file_path.exists() {
+        return Err(format!("Document file not found: {}", expanded));
+    }
+    fs::read_to_string(file_path).map_err(|e| format!("Failed to read document: {}", e))
+}
+
+#[tauri::command]
 fn read_local_image(path: String) -> Result<String, String> {
     let expanded = expand_tilde(&path);
     let file_path = Path::new(&expanded);
@@ -362,6 +433,8 @@ pub fn run() {
             execute_action,
             pick_folder_dialog,
             pick_image_dialog,
+            pick_document_dialog,
+            read_document_file,
             read_local_image
         ])
         .run(tauri::generate_context!())

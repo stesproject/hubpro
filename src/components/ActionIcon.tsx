@@ -2,6 +2,8 @@ import React from 'react';
 import {
   Sparkles,
   FolderOpen,
+  FileText,
+  BookOpen,
   Terminal,
   Globe,
   Code2,
@@ -24,6 +26,8 @@ interface ActionIconProps {
 export const ACTION_ICON_OPTIONS: { value: ActionIconName; label: string }[] = [
   { value: 'sparkles', label: 'Sparkles / Antigravity' },
   { value: 'folder', label: 'Folder' },
+  { value: 'file-text', label: 'Document / File' },
+  { value: 'book-open', label: 'Book / Reference' },
   { value: 'terminal', label: 'Terminal' },
   { value: 'globe', label: 'Globe / Web URL' },
   { value: 'code', label: 'Code' },
@@ -49,17 +53,23 @@ export const ActionIcon: React.FC<ActionIconProps> = ({
         ? 'rocket'
         : fallbackType === 'open_folder'
           ? 'folder'
-          : fallbackType === 'run_command'
-            ? 'terminal'
-            : fallbackType === 'open_url'
-              ? 'globe'
-              : 'kanban');
+          : fallbackType === 'open_document'
+            ? 'file-text'
+            : fallbackType === 'run_command'
+              ? 'terminal'
+              : fallbackType === 'open_url'
+                ? 'globe'
+                : 'kanban');
 
   switch (effectiveName) {
     case 'sparkles':
       return <Sparkles className={className} />;
     case 'folder':
       return <FolderOpen className={className} />;
+    case 'file-text':
+      return <FileText className={className} />;
+    case 'book-open':
+      return <BookOpen className={className} />;
     case 'terminal':
       return <Terminal className={className} />;
     case 'globe':

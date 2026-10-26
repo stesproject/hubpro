@@ -49,6 +49,7 @@
   "actionTypes": {
     "open_ide": "Open in IDE / App",
     "open_folder": "Open Folder in Finder",
+    "open_document": "Open Document / File",
     "open_app": "Launch Application (.app)",
     "run_command": "Run Terminal Command",
     "open_url": "Open External URL",
@@ -57,6 +58,7 @@
   "actionDescriptions": {
     "open_ide": "Opens a directory in Antigravity IDE, VS Code, Cursor, Zed, or any macOS app",
     "open_folder": "Opens a folder or assets directory directly in macOS Finder",
+    "open_document": "Opens a document or notes file in HubPro's viewer or with system default app",
     "open_app": "Launches a native application from /Applications or custom path",
     "run_command": "Executes a command (e.g. npm run dev) in Terminal.app or in background",
     "open_url": "Opens a deployed domain, Cloudflare dashboard, or web resource in browser",
@@ -128,6 +130,7 @@
       "rootDirectory": "Default Project Directory",
       "rootDirectoryPlaceholder": "/Users/stef/Desktop/Dev/...",
       "browseFolder": "Browse...",
+      "browseDocument": "Browse...",
       "previewImage": "Preview Image (Optional)",
       "previewImagePlaceholder": "Local file path or https:// image URL...",
       "browseImage": "Choose Image...",
@@ -157,10 +160,18 @@
       "addPresetAntigravity": "+ Antigravity IDE",
       "addPresetFinder": "+ Open Directory",
       "addPresetDevServer": "+ Start Dev Server",
-      "addPresetUrl": "+ External URL"
+      "addPresetUrl": "+ External URL",
+      "addPresetDocument": "+ Open Document"
     },
     "actionEditor": {
       "type": "Action Type",
+      "documentViewerMode": "Opening Mode",
+      "openModeInApp": "HubPro In-App Viewer (Markdown & LaTeX Formulas)",
+      "openModeSystem": "System Default Application (or Custom App)",
+      "targetDocument": "Document File Path",
+      "targetDocumentPlaceholder": "Path to .md, .pdf, .txt, or note file...",
+      "customAppName": "Open With Application (Optional)",
+      "customAppNamePlaceholder": "e.g. Preview, Visual Studio Code (leave blank for default)",
       "targetFolder": "Directory Path (leave blank to use Default Project Directory)",
       "targetFolderPlaceholder": "Defaulting to project root directory",
       "targetUrl": "External URL (Browser)",
@@ -192,5 +203,18 @@
     "projectSaved": "Project \"{{name}}\" saved",
     "projectDeleted": "Project deleted",
     "dataExported": "Projects configuration copied to clipboard"
+  },
+  "documentViewer": {
+    "title": "Document Viewer",
+    "copy": "Copy Path",
+    "copyPath": "Copy document path",
+    "copyPathHint": "Click to copy full path",
+    "copied": "Copied!",
+    "searchPlaceholder": "Search (⌘F)...",
+    "openExternal": "Open with App",
+    "openExternalTooltip": "Open in system default application",
+    "loading": "Loading document...",
+    "errorTitle": "Could not load document preview",
+    "tryOpeningExternally": "Open in External Application"
   }
 }

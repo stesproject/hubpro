@@ -30,6 +30,7 @@ import {
 import { ProjectCard } from './components/ProjectCard';
 import { ProjectBoardView } from './components/ProjectBoardView';
 import { ProjectConfigModal } from './components/ProjectConfigModal';
+import { DocumentViewerModal } from './components/DocumentViewerModal';
 
 interface ToastNotification {
   id: string;
@@ -53,6 +54,12 @@ export const App: React.FC = () => {
   const [activeBoardProjectId, setActiveBoardProjectId] = useState<
     string | null
   >(null);
+
+  // Active In-App Document Viewer Modal State
+  const [activeDocumentState, setActiveDocumentState] = useState<{
+    action: ConfiguredAction;
+    project: Project;
+  } | null>(null);
 
   // Project Configuration Modal State
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -186,12 +193,35 @@ export const App: React.FC = () => {
   );
 
   // Action Execution Handlers
+  const handleOpenDocument = (action: ConfiguredAction, project: Project) => {
+    setActiveDocumentState({ action, project });
+  };
+
+  const handleOpenDocumentExternally = async (
+    action: ConfiguredAction,
+    project: Project
+  ) => {
+    try {
+      const msg = await executeSingleAction(
+        { ...action, openMode: 'system' },
+        project
+      );
+      pushToast(t('toast.actionSuccess', { message: msg }), 'success');
+    } catch (err) {
+      pushToast(
+        t('toast.actionError', { error: String(err) }),
+        'error'
+      );
+    }
+  };
+
   const handleCardPrimaryClick = async (project: Project) => {
     try {
       const messages = await executeActionSequence(
         project.primaryClickActions,
         project,
-        (proj) => setActiveBoardProjectId(proj.id)
+        (proj) => setActiveBoardProjectId(proj.id),
+        handleOpenDocument
       );
       if (messages.length > 0 && project.primaryClickActions.length > 0) {
         pushToast(
@@ -215,7 +245,8 @@ export const App: React.FC = () => {
       const msg = await executeSingleAction(
         button.action,
         project,
-        (proj) => setActiveBoardProjectId(proj.id)
+        (proj) => setActiveBoardProjectId(proj.id),
+        handleOpenDocument
       );
       pushToast(t('toast.actionSuccess', { message: msg }), 'success');
     } catch (err) {
@@ -231,8 +262,11 @@ export const App: React.FC = () => {
     project: Project
   ) => {
     try {
-      const msg = await executeSingleAction(action, project, (proj) =>
-        setActiveBoardProjectId(proj.id)
+      const msg = await executeSingleAction(
+        action,
+        project,
+        (proj) => setActiveBoardProjectId(proj.id),
+        handleOpenDocument
       );
       pushToast(t('toast.actionSuccess', { message: msg }), 'success');
     } catch (err) {
@@ -596,6 +630,15 @@ export const App: React.FC = () => {
           onDuplicate={handleDuplicateProject}
         />
       )}
+
+      {/* In-App Document Viewer Modal */}
+      <DocumentViewerModal
+        isOpen={Boolean(activeDocumentState)}
+        action={activeDocumentState?.action || null}
+        project={activeDocumentState?.project || null}
+        onClose={() => setActiveDocumentState(null)}
+        onOpenExternally={handleOpenDocumentExternally}
+      />
 
       {/* Floating Toast Notifications */}
       {toasts.length > 0 && (

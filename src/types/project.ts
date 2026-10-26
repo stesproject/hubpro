@@ -1,6 +1,7 @@
 export type ActionType =
   | 'open_ide'
   | 'open_folder'
+  | 'open_document'
   | 'run_command'
   | 'open_url'
   | 'open_board'
@@ -9,6 +10,8 @@ export type ActionType =
 export type ActionIconName =
   | 'sparkles'
   | 'folder'
+  | 'file-text'
+  | 'book-open'
   | 'terminal'
   | 'globe'
   | 'code'
@@ -31,14 +34,16 @@ export interface ConfiguredAction {
   id: string;
   type: ActionType;
   label?: string;
-  /** Path for open_folder/open_ide, URL for open_url, or shell command for run_command */
+  /** Path for open_folder/open_ide/open_document, URL for open_url, or shell command for run_command */
   target: string;
   /** Optional working directory override (falls back to project.rootDirectory) */
   workingDir?: string;
-  /** IDE/App name for open_ide (e.g., "Antigravity", "Visual Studio Code", "Cursor", "Godot") */
+  /** IDE/App name for open_ide/open_document (e.g., "Antigravity", "Visual Studio Code", "Cursor", "Preview") */
   appName?: string;
   /** For run_command: whether to open an interactive Terminal.app window (default true) */
   runInTerminal?: boolean;
+  /** For open_document: 'in_app' (view in HubPro modal with math rendering) or 'system' (open external app) */
+  openMode?: 'in_app' | 'system';
 }
 
 export interface ProjectActionButton {

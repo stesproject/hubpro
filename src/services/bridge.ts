@@ -77,7 +77,8 @@ export async function saveProjects(projects: Project[]): Promise<void> {
 export async function executeSingleAction(
   action: ConfiguredAction,
   project: Project,
-  onOpenBoard?: (project: Project) => void
+  onOpenBoard?: (project: Project) => void,
+  onOpenDocument?: (action: ConfiguredAction, project: Project) => void
 ): Promise<string> {
   if (action.type === 'open_board') {
     onOpenBoard?.(project);
@@ -92,6 +93,12 @@ export async function executeSingleAction(
 
   const effectiveWorkDir = action.workingDir?.trim() || project.rootDirectory || undefined;
 
+  // If action is open_document and configured for in-app viewer (or default in_app)
+  if (action.type === 'open_document' && action.openMode !== 'system' && onOpenDocument) {
+    onOpenDocument(action, project);
+    return `Opened document preview: ${action.label || effectiveTarget}`;
+  }
+
   if (!isTauriEnvironment()) {
     if (action.type === 'open_url') {
       const url =
@@ -100,6 +107,10 @@ export async function executeSingleAction(
           : `https://${effectiveTarget}`;
       window.open(url, '_blank', 'noopener,noreferrer');
       return `Opened URL: ${url}`;
+    }
+    if (action.type === 'open_document' && onOpenDocument) {
+      onOpenDocument(action, project);
+      return `Opened document: ${effectiveTarget}`;
     }
     return `[Preview] ${action.type}: ${effectiveTarget}`;
   }
@@ -116,7 +127,8 @@ export async function executeSingleAction(
 export async function executeActionSequence(
   actions: ConfiguredAction[],
   project: Project,
-  onOpenBoard?: (project: Project) => void
+  onOpenBoard?: (project: Project) => void,
+  onOpenDocument?: (action: ConfiguredAction, project: Project) => void
 ): Promise<string[]> {
   if (!actions || actions.length === 0) {
     onOpenBoard?.(project);
@@ -125,7 +137,7 @@ export async function executeActionSequence(
 
   const results: string[] = [];
   for (const act of actions) {
-    const res = await executeSingleAction(act, project, onOpenBoard);
+    const res = await executeSingleAction(act, project, onOpenBoard, onOpenDocument);
     results.push(res);
   }
   return results;
@@ -138,6 +150,22 @@ export async function pickFolderNative(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+export async function pickDocumentNative(): Promise<string | null> {
+  if (!isTauriEnvironment()) return null;
+  try {
+    return await invoke<string | null>('pick_document_dialog');
+  } catch {
+    return null;
+  }
+}
+
+export async function readDocumentFile(path: string): Promise<string> {
+  if (!isTauriEnvironment()) {
+    throw new Error('Reading local document requires native desktop application.');
+  }
+  return await invoke<string>('read_document_file', { path });
 }
 
 export async function pickImageNative(): Promise<string | null> {

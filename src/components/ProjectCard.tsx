@@ -94,6 +94,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         return `${act.appName || 'Antigravity'}`;
       case 'open_folder':
         return t('actionTypes.open_folder');
+      case 'open_document':
+        return t('actionTypes.open_document', { defaultValue: 'Open Document' });
       case 'open_app':
         return t('actionTypes.open_app');
       case 'run_command':
@@ -111,6 +113,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         return act.appName || 'Antigravity';
       case 'open_folder':
         return 'Finder';
+      case 'open_document': {
+        const parts = act.target.split('/');
+        return parts[parts.length - 1] || 'Document';
+      }
       case 'open_app':
         return 'App';
       case 'run_command':

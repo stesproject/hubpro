@@ -5,6 +5,7 @@ import {
   Plus,
   Trash2,
   FolderOpen,
+  FileText,
   Image as ImageIcon,
   Zap,
   Sliders,
@@ -28,6 +29,7 @@ import { GRADIENT_PRESETS } from '../data/defaultProjects';
 import {
   pickFolderNative,
   pickImageNative,
+  pickDocumentNative,
   resolvePreviewImage,
 } from '../services/bridge';
 import { ACTION_ICON_OPTIONS, ActionIcon } from './ActionIcon';
@@ -44,6 +46,7 @@ interface ProjectConfigModalProps {
 const ACTION_TYPES: ActionType[] = [
   'open_ide',
   'open_folder',
+  'open_document',
   'open_app',
   'run_command',
   'open_url',
@@ -281,7 +284,7 @@ export const ProjectConfigModal: React.FC<ProjectConfigModalProps> = ({
   };
 
   const handleAddPresetButton = (
-    preset: 'antigravity' | 'finder' | 'dev' | 'url'
+    preset: 'antigravity' | 'finder' | 'dev' | 'url' | 'document'
   ) => {
     const id = `btn-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
     const actId = `b-act-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
@@ -324,6 +327,19 @@ export const ProjectConfigModal: React.FC<ProjectConfigModalProps> = ({
           target: 'npm run dev',
           workingDir: draft.rootDirectory || '',
           runInTerminal: true,
+        },
+      };
+    } else if (preset === 'document') {
+      newBtn = {
+        id,
+        label: 'Document',
+        icon: 'file-text',
+        variant: 'amber',
+        action: {
+          id: actId,
+          type: 'open_document',
+          target: '',
+          openMode: 'in_app',
         },
       };
     } else {
@@ -409,6 +425,8 @@ export const ProjectConfigModal: React.FC<ProjectConfigModalProps> = ({
         }`;
       case 'open_folder':
         return `Finder → ${act.target || draft.rootDirectory || '...'}`;
+      case 'open_document':
+        return `Doc (${act.openMode === 'system' ? 'System' : 'In-App'}) → ${act.target || '...'}`;
       case 'open_app':
         return `App → ${act.target || '...'}`;
       case 'run_command':
@@ -535,6 +553,86 @@ export const ProjectConfigModal: React.FC<ProjectConfigModalProps> = ({
                 <FolderOpen className="w-3.5 h-3.5 text-indigo-500" />
                 <span>{t('modal.fields.browseFolder')}</span>
               </button>
+            </div>
+          </div>
+        )}
+
+        {act.type === 'open_document' && (
+          <div className="space-y-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className={LABEL_BASE_CLASS}>
+                  {t('modal.actionEditor.documentViewerMode', { defaultValue: 'Opening Mode' })}
+                </label>
+                <div className="relative">
+                  <select
+                    value={act.openMode ?? 'in_app'}
+                    onChange={(e) =>
+                      onChange({
+                        openMode: e.target.value as 'in_app' | 'system',
+                      })
+                    }
+                    className={`${CONTROL_BASE_CLASS} appearance-none pr-9 cursor-pointer`}
+                  >
+                    <option value="in_app">
+                      {t('modal.actionEditor.openModeInApp', {
+                        defaultValue: 'HubPro In-App Viewer (Math & LaTeX)',
+                      })}
+                    </option>
+                    <option value="system">
+                      {t('modal.actionEditor.openModeSystem', {
+                        defaultValue: 'System External App',
+                      })}
+                    </option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              {act.openMode === 'system' && (
+                <div>
+                  <label className={LABEL_BASE_CLASS}>
+                    {t('modal.actionEditor.customAppName', { defaultValue: 'Open With App (Optional)' })}
+                  </label>
+                  <input
+                    type="text"
+                    value={act.appName ?? ''}
+                    onChange={(e) => onChange({ appName: e.target.value })}
+                    placeholder={t('modal.actionEditor.customAppNamePlaceholder', {
+                      defaultValue: 'e.g. Preview, Visual Studio Code',
+                    })}
+                    className={CONTROL_BASE_CLASS}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className={LABEL_BASE_CLASS}>
+                {t('modal.actionEditor.targetDocument', { defaultValue: 'Document File Path' })}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={act.target}
+                  onChange={(e) => onChange({ target: e.target.value })}
+                  placeholder={t('modal.actionEditor.targetDocumentPlaceholder', {
+                    defaultValue: 'Path to .md, .pdf, .txt, or note file...',
+                  })}
+                  className={`${CONTROL_BASE_CLASS} font-mono`}
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const doc = await pickDocumentNative();
+                    if (doc) onChange({ target: doc });
+                  }}
+                  className="h-10 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-slate-200/80 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 transition-colors"
+                >
+                  <FileText className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>{t('modal.fields.browseDocument', { defaultValue: 'Browse...' })}</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1027,6 +1125,13 @@ export const ProjectConfigModal: React.FC<ProjectConfigModalProps> = ({
                     className="h-9 px-3 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-violet-600 dark:text-violet-300 text-xs font-semibold transition-colors"
                   >
                     {t('modal.buttonsSection.addPresetUrl')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddPresetButton('document')}
+                    className="h-9 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-600 dark:text-amber-300 text-xs font-semibold transition-colors"
+                  >
+                    {t('modal.buttonsSection.addPresetDocument', { defaultValue: '+ Open Document' })}
                   </button>
                 </div>
               </div>

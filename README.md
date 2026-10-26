@@ -14,6 +14,7 @@ HubPro is a lightweight, native macOS & cross-platform desktop application built
   - Add any number of buttons underneath each project card with custom labels, icons, color styles, and actions:
     - **Open in IDE / App** (`Antigravity`, `Visual Studio Code`, `Cursor`, `Zed`, `Godot`, `Xcode`, etc.)
     - **Open Folder in Finder**
+    - **Open Document / File** (In-App viewer with Markdown & KaTeX math rendering, or system default app)
     - **Run Terminal Command** (interactive `Terminal.app` window or background execution)
     - **Open External URL** (deployed domains, Cloudflare dashboard, localhost, docs)
     - **Open Project Board & Overview**
