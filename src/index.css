@@ -15,6 +15,10 @@
     -moz-appearance: none;
     appearance: none;
   }
+
+  .auto-resize-textarea {
+    field-sizing: content;
+  }
 }
 
 /* Document Markdown & KaTeX Typography Styling */

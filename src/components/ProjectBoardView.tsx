@@ -25,6 +25,7 @@ import {
   TodoColumnId,
 } from '../types/project';
 import { ActionIcon } from './ActionIcon';
+import { AutoResizeTextarea } from './AutoResizeTextarea';
 
 interface ProjectBoardViewProps {
   project: Project;
@@ -376,9 +377,9 @@ export const ProjectBoardView: React.FC<ProjectBoardViewProps> = ({
               {/* Inline Add Card Form */}
               {isAddingHere && (
                 <div className="mb-3 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-indigo-500/40 shadow-sm space-y-2">
-                  <input
-                    type="text"
+                  <AutoResizeTextarea
                     autoFocus
+                    rows={1}
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     onKeyDown={(e) => {
@@ -388,14 +389,20 @@ export const ProjectBoardView: React.FC<ProjectBoardViewProps> = ({
                       }
                     }}
                     placeholder={t('board.newCardTitlePlaceholder')}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 text-xs font-semibold leading-snug text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   />
-                  <textarea
+                  <AutoResizeTextarea
                     rows={2}
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        handleAddCard(col.id);
+                      }
+                    }}
                     placeholder={t('board.newCardDescPlaceholder')}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 text-xs text-slate-700 dark:text-zinc-300 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 resize-none"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 text-xs leading-relaxed text-slate-700 dark:text-zinc-300 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   />
                   <div className="flex items-center justify-end gap-1.5 pt-1">
                     <button
@@ -467,14 +474,20 @@ export const ProjectBoardView: React.FC<ProjectBoardViewProps> = ({
                           )}
                         </button>
 
-                        <input
-                          type="text"
+                        <AutoResizeTextarea
+                          rows={1}
                           value={card.title}
                           onChange={(e) =>
                             handleUpdateCardField(card.id, 'title', e.target.value)
                           }
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              (e.target as HTMLTextAreaElement).blur();
+                            }
+                          }}
                           placeholder={t('board.editCardTitlePlaceholder')}
-                          className={`w-full bg-transparent text-sm font-semibold focus:outline-none focus:bg-slate-50 dark:focus:bg-zinc-800/70 rounded px-1 -mx-1 transition-colors ${
+                          className={`w-full min-w-0 bg-transparent text-sm font-semibold leading-snug focus:outline-none focus:bg-slate-50 dark:focus:bg-zinc-800/70 rounded px-1 -mx-1 transition-colors ${
                             card.completed
                               ? 'line-through text-slate-400 dark:text-zinc-500'
                               : 'text-slate-800 dark:text-zinc-100'
@@ -483,16 +496,9 @@ export const ProjectBoardView: React.FC<ProjectBoardViewProps> = ({
                       </div>
 
                       {/* Direct Editable Description */}
-                      <div className="mt-2 pl-6">
-                        <textarea
-                          rows={
-                            card.description
-                              ? Math.min(
-                                  5,
-                                  Math.max(2, card.description.split('\n').length)
-                                )
-                              : 1
-                          }
+                      <div className="mt-1 pl-6">
+                        <AutoResizeTextarea
+                          rows={1}
                           value={card.description}
                           onChange={(e) =>
                             handleUpdateCardField(
@@ -502,7 +508,7 @@ export const ProjectBoardView: React.FC<ProjectBoardViewProps> = ({
                             )
                           }
                           placeholder={t('board.editCardDescPlaceholder')}
-                          className={`w-full bg-transparent text-xs leading-relaxed focus:outline-none focus:bg-slate-50 dark:focus:bg-zinc-800/70 rounded px-1.5 py-1 -mx-1.5 resize-none transition-colors ${
+                          className={`w-full min-w-0 bg-transparent text-xs leading-relaxed focus:outline-none focus:bg-slate-50 dark:focus:bg-zinc-800/70 rounded px-1.5 py-1 -mx-1.5 transition-colors ${
                             card.completed
                               ? 'text-slate-400 dark:text-zinc-500'
                               : 'text-slate-600 dark:text-zinc-400 placeholder:text-slate-300 dark:placeholder:text-zinc-600'

@@ -265,7 +265,7 @@ export const App: React.FC = () => {
   };
 
   // Project CRUD Handlers
-  const handleSaveProject = (saved: Project) => {
+  const handleSaveProject = (saved: Project, showToast = true) => {
     const exists = projects.some((p) => p.id === saved.id);
     const next = exists
       ? projects.map((p) => (p.id === saved.id ? saved : p))
@@ -273,7 +273,9 @@ export const App: React.FC = () => {
     persistAndSetProjects(next);
     setEditingProject(null);
     setIsCreatingNew(false);
-    pushToast(t('toast.projectSaved', { name: saved.name }), 'success');
+    if (showToast) {
+      pushToast(t('toast.projectSaved', { name: saved.name }), 'success');
+    }
   };
 
   const handleDeleteProject = (projectId: string) => {
@@ -339,7 +341,7 @@ export const App: React.FC = () => {
           <ProjectBoardView
             project={activeBoardProject}
             onBack={() => setActiveBoardProjectId(null)}
-            onUpdateProject={handleSaveProject}
+            onUpdateProject={(updated) => handleSaveProject(updated, false)}
             onEditProject={(proj) => {
               setEditingProject(proj);
               setIsCreatingNew(false);
